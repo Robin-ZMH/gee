@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+type H map[string]any
+
 type Context struct {
 	// origin objects
 	Writer http.ResponseWriter

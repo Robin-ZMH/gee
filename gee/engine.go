@@ -12,7 +12,7 @@ type Engine struct {
 }
 
 // NewEngine is the constructor of gee.Engine
-func NewEngine() *Engine {
+func New() *Engine {
 	return &Engine{router: newRouter()}
 }
 
