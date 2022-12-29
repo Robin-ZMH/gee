@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-	engine := gee.New()
+	engine := gee.NewEngine()
 	log.Fatal(engine.Run(":9000"))
 }
-

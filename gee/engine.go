@@ -7,22 +7,21 @@ import (
 
 type HandlerFunc func(http.ResponseWriter, *http.Request)
 
-type Engine struct{
+type Engine struct {
 	router map[string]HandlerFunc
 }
 
-// New is the constructor of gee.Engine
-func New() *Engine {
+// NewEngine is the constructor of gee.Engine
+func NewEngine() *Engine {
 	return &Engine{router: make(map[string]HandlerFunc)}
 }
 
-
-func (e *Engine) register(method, pattern string, handler HandlerFunc){
-	e.router[method + "-" + pattern] = handler
+func (e *Engine) register(method, pattern string, handler HandlerFunc) {
+	e.router[method+"-"+pattern] = handler
 }
 
 // GET defines the method to add GET request
-func (e Engine) GET(pattern string, handler HandlerFunc){
+func (e Engine) GET(pattern string, handler HandlerFunc) {
 	e.register("GET", pattern, handler)
 }
 
@@ -40,7 +39,7 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	key := req.Method + "-" + req.URL.Path
 	if handler, ok := e.router[key]; ok {
 		handler(w, req)
-	}else{
+	} else {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, "404 Not Found: %s\n", req.URL)
 	}
