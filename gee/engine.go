@@ -8,10 +8,14 @@ import (
 type HandlerFunc func(*Context)
 
 type Engine struct {
+	/* router provides methods:
+	1. add mapping of path to hanler
+	2. handle the context of current request
+	*/ 
 	router *router
 }
 
-// NewEngine is the constructor of gee.Engine
+// New is the constructor of gee.Engine
 func New() *Engine {
 	return &Engine{router: newRouter()}
 }

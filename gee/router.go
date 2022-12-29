@@ -24,6 +24,6 @@ func (r *router) handle(c *Context) {
 	if handler, ok := r.handlers[key]; ok {
 		handler(c)
 	} else {
-		c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)
+		c.String(http.StatusNotFound, "404 Not Found: %s\n", c.Path)
 	}
 }

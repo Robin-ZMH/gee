@@ -8,6 +8,10 @@ import (
 
 type H map[string]any
 
+/*
+Context exposes interfaces of obtaining information about the request,
+Context provides methods to render the different data type
+*/
 type Context struct {
 	// origin objects
 	Writer http.ResponseWriter
