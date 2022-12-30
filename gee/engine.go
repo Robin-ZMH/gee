@@ -6,38 +6,16 @@ import "net/http"
 type HandlerFunc func(*Context)
 
 type Engine struct {
-	router *routerGroup
+	*routerGroup
 	groups []*routerGroup
 }
 
 // New is the constructor of gee.Engine
 func New() *Engine {
-	e := &Engine{router: newRouterGroup()}
-	e.router.Engine = e
-	e.groups = []*routerGroup{e.router}
+	e := &Engine{routerGroup: newRouterGroup()}
+	e.routerGroup.engine = e
+	e.groups = []*routerGroup{e.routerGroup}
 	return e
-}
-
-func (e *Engine) Group(prefix string) *routerGroup {
-	newGroup := &routerGroup{
-		router: e.router.router,
-		prefix: e.router.prefix + prefix,
-		parent: e.router,
-		Engine: e,
-	}
-	e.groups = append(e.groups, newGroup)
-
-	return newGroup
-}
-
-// GET defines the method to add GET request
-func (e *Engine) GET(pattern string, handler HandlerFunc) {
-	e.router.register("GET", pattern, handler)
-}
-
-// POST defines the method to add POST request
-func (e *Engine) POST(pattern string, handler HandlerFunc) {
-	e.router.register("POST", pattern, handler)
 }
 
 // Run defines the method to start a http server
