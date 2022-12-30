@@ -36,7 +36,7 @@ func NewContext(w http.ResponseWriter, req *http.Request) *Context {
 }
 
 func (c *Context) Param(key string) string {
-	value, _ := c.Params[key]
+	value := c.Params[key]
 	return value
 }
 
