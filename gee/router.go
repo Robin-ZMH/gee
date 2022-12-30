@@ -3,7 +3,6 @@ package gee
 import (
 	"log"
 	"net/http"
-	"path"
 	"strings"
 )
 
