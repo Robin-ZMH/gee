@@ -1,37 +1,43 @@
 package gee
 
-import (
-	"net/http"
-)
+import "net/http"
 
 // HandlerFunc defines the request handler used by gee
 type HandlerFunc func(*Context)
 
 type Engine struct {
-	/* router provides methods:
-	1. add mapping of path to hanler
-	2. handle the context of current request
-	*/ 
-	router *router
+	router *routerGroup
+	groups []*routerGroup
 }
 
 // New is the constructor of gee.Engine
 func New() *Engine {
-	return &Engine{router: newRouter()}
+	e := &Engine{router: newRouterGroup()}
+	e.router.Engine = e
+	e.groups = []*routerGroup{e.router}
+	return e
 }
 
-func (e *Engine) register(method, pattern string, handler HandlerFunc) {
-	e.router.addRoute(method, pattern, handler)
+func (e *Engine) Group(prefix string) *routerGroup {
+	newGroup := &routerGroup{
+		router: e.router.router,
+		prefix: e.router.prefix + prefix,
+		parent: e.router,
+		Engine: e,
+	}
+	e.groups = append(e.groups, newGroup)
+
+	return newGroup
 }
 
 // GET defines the method to add GET request
-func (e Engine) GET(pattern string, handler HandlerFunc) {
-	e.register("GET", pattern, handler)
+func (e *Engine) GET(pattern string, handler HandlerFunc) {
+	e.router.register("GET", pattern, handler)
 }
 
 // POST defines the method to add POST request
-func (engine *Engine) POST(pattern string, handler HandlerFunc) {
-	engine.register("POST", pattern, handler)
+func (e *Engine) POST(pattern string, handler HandlerFunc) {
+	e.router.register("POST", pattern, handler)
 }
 
 // Run defines the method to start a http server

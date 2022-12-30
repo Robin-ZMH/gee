@@ -18,7 +18,7 @@ func newRouter() *router {
 	}
 }
 
-func (r *router) addRoute(method string, pattern string, handler HandlerFunc) {
+func (r *router) register(method string, pattern string, handler HandlerFunc) {
 	log.Printf("ADD route %4s - %s", method, pattern)
 
 	if _, ok := r.tries[method]; !ok {
