@@ -6,6 +6,7 @@ import (
 )
 
 type router struct {
+	tries    map[string]*trie
 	handlers map[string]HandlerFunc
 }
 

@@ -20,8 +20,8 @@ $ curl "http://localhost:9999/xxx"
 */
 
 import (
-	"net/http"
 	"gee"
+	"net/http"
 )
 
 func main() {
