@@ -36,6 +36,9 @@ func (n *node) String() string {
 }
 
 func (n *node) isAny() bool {
+	if len(n.part) == 0 {
+		return false
+	}
 	return n.part[0] == '*' || n.part[0] == ':'
 }
 
