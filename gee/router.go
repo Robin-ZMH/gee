@@ -55,14 +55,19 @@ func (r *router) getParams(path, pattern string) map[string]string {
 	return params
 }
 
+// handle will parse the url path to find the handler function,
+// and add it into *(Context).handlers, then call *(Context).Next()
 func (r *router) handle(c *Context) {
 	pattern := r.matchPattern(c.Method, c.Path)
 	if pattern != "" {
 		params := r.getParams(c.Path, pattern)
 		c.Params = params
 		key := c.Method + "-" + pattern
-		r.handlers[key](c)
+		c.handlers = append(c.handlers, r.handlers[key])
 	} else {
-		c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)
+		c.handlers = append(c.handlers, func(ctx *Context) {
+			c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)
+		})
 	}
+	c.Next()
 }

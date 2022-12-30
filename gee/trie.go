@@ -1,9 +1,6 @@
 package gee
 
-import (
-	"fmt"
-	"strings"
-)
+import "fmt"
 
 type node struct {
 	part     string
@@ -17,18 +14,6 @@ type trie struct {
 
 func newTrie() *trie {
 	return &trie{root: &node{}}
-}
-
-func parsePattern(path string) (parts []string) {
-	for _, part := range strings.Split(path, "/") {
-		if part != "" {
-			parts = append(parts, part)
-			if strings.HasPrefix(part, "*") {
-				return
-			}
-		}
-	}
-	return
 }
 
 func (n *node) String() string {

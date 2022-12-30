@@ -6,8 +6,6 @@ import (
 	"net/http"
 )
 
-type H map[string]any
-
 /*
 Context exposes interfaces of obtaining information about the request,
 Context provides methods to render the different data type
@@ -24,15 +22,35 @@ type Context struct {
 
 	// response info
 	StatusCode int
+
+	// middlewares
+	handlers []HandlerFunc
+	index    int
 }
 
-func NewContext(w http.ResponseWriter, req *http.Request) *Context {
-	return &Context{
+// NewContext will create a new Context object, and it will parse registered middlewares
+// of the Engine object, add them to the "hanlers" field.
+func NewContext(e *Engine, w http.ResponseWriter, req *http.Request) *Context {
+	context := &Context{
 		Writer: w,
 		Req:    req,
 		Path:   req.URL.Path,
 		Method: req.Method,
+		index:  -1,
 	}
+	path := req.URL.Path
+	prefixes := parsePattern(path)
+	for _, prefix := range prefixes {
+		if group, ok := e.groups[prefix]; ok {
+			context.handlers = append(context.handlers, group.middlewares...)
+		}
+	}
+	return context
+}
+
+func (c *Context) Fail(code int, err string) {
+	c.index = len(c.handlers)
+	c.JSON(code, H{"message": err})
 }
 
 func (c *Context) Param(key string) string {
@@ -89,4 +107,13 @@ func (c *Context) HTML(code int, html string) {
 	c.SetHeader("Content-Type", "text/html")
 	c.Status(code)
 	c.Writer.Write([]byte(html))
+}
+
+// Next will sequentially execute the middlewares(handlers).
+func (c *Context) Next() {
+	// every time calls Next() must increament the index
+	c.index++
+	for ; c.index < len(c.handlers); c.index++ {
+		c.handlers[c.index](c)
+	}
 }
