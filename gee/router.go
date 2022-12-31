@@ -50,10 +50,10 @@ func (r *router) getParams(path, pattern string) map[string]string {
 // and add it into *(Context).handlers, then call *(Context).Next()
 func (r *router) handle(c *Context) {
 	node := r.route(c.Method, c.Path)
-	if node != nil{
-		pattern, middlewares := node.pattern, node.middlewares
+	if node != nil {
+		pattern, handlers := node.pattern, node.handlers
 		params := r.getParams(c.Path, pattern)
-		c.handlers = append(c.handlers, middlewares...)
+		c.handlers = append(c.handlers, handlers...)
 		c.Params = params
 	} else {
 		c.handlers = append(c.handlers, func(ctx *Context) {

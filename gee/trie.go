@@ -2,13 +2,19 @@ package gee
 
 import "fmt"
 
+// node holds the information of each prefix of a path.
 type node struct {
-	prefix      string
-	children    []*node
-	pattern     string
-	middlewares []HandlerFunc
+	prefix   string
+	children []*node
+	// if this node is the end of one path, pattern is the path,
+	// otherwise pattern is an empty string.
+	pattern string
+	// if this node is the end of path, handlers will be the handlers
+	// of all groups this path belongs to.
+	handlers []HandlerFunc
 }
 
+// trie holds the root node of the trie.
 type trie struct {
 	root *node
 }
@@ -59,7 +65,7 @@ func (t *trie) insert(pattern string, middlewares []HandlerFunc) {
 		cur_node = new_node
 	}
 	cur_node.pattern = pattern
-	cur_node.middlewares = middlewares
+	cur_node.handlers = middlewares
 }
 
 func (n *node) search(parts []string) *node {

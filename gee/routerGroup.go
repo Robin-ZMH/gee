@@ -1,9 +1,7 @@
 package gee
 
 type routerGroup struct {
-	// embedding router
-	*router
-	// new fields
+	router      *router
 	prefix      string
 	parent      *routerGroup
 	engine      *Engine
@@ -27,7 +25,7 @@ func (g *routerGroup) addRoute(method, pattern string, handler HandlerFunc) {
 	pattern = g.prefix + pattern
 	middlewares := g.scanMiddleWares()
 	middlewares = append(middlewares, handler)
-	g.register(method, pattern, middlewares...)
+	g.router.register(method, pattern, middlewares...)
 }
 
 // GET defines the method to add GET request
