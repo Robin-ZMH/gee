@@ -7,37 +7,28 @@ import (
 )
 
 type router struct {
-	tries    map[string]*trie
-	handlers map[string]HandlerFunc
+	tries map[string]*trie
 }
 
 func newRouter() *router {
-	return &router{
-		tries:    make(map[string]*trie),
-		handlers: make(map[string]HandlerFunc),
-	}
+	return &router{tries: make(map[string]*trie)}
 }
 
-func (r *router) register(method string, pattern string, handler HandlerFunc) {
-	log.Printf("ADD route %4s - %s", method, pattern)
+func (r *router) register(method string, pattern string, middlewares ...HandlerFunc) {
+	log.Printf("ADD route %4s - %s\n", method, pattern)
 
 	if _, ok := r.tries[method]; !ok {
 		r.tries[method] = newTrie()
 	}
-	r.tries[method].insert(pattern)
-
-	key := method + "-" + pattern
-	r.handlers[key] = handler
+	r.tries[method].insert(pattern, middlewares)
 }
 
-func (r *router) matchPattern(method, path string) (pattern string) {
+func (r *router) route(method, path string) *node {
 	if t, ok := r.tries[method]; ok {
 		node := t.search(path)
-		if node != nil {
-			return node.pattern
-		}
+		return node
 	}
-	return
+	return nil
 }
 
 func (r *router) getParams(path, pattern string) map[string]string {
@@ -58,12 +49,12 @@ func (r *router) getParams(path, pattern string) map[string]string {
 // handle will parse the url path to find the handler function,
 // and add it into *(Context).handlers, then call *(Context).Next()
 func (r *router) handle(c *Context) {
-	pattern := r.matchPattern(c.Method, c.Path)
-	if pattern != "" {
+	node := r.route(c.Method, c.Path)
+	if node != nil{
+		pattern, middlewares := node.pattern, node.middlewares
 		params := r.getParams(c.Path, pattern)
+		c.handlers = append(c.handlers, middlewares...)
 		c.Params = params
-		key := c.Method + "-" + pattern
-		c.handlers = append(c.handlers, r.handlers[key])
 	} else {
 		c.handlers = append(c.handlers, func(ctx *Context) {
 			c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)

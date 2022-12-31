@@ -38,13 +38,6 @@ func NewContext(e *Engine, w http.ResponseWriter, req *http.Request) *Context {
 		Method: req.Method,
 		index:  -1,
 	}
-	path := req.URL.Path
-	prefixes := parsePattern(path)
-	for _, prefix := range prefixes {
-		if group, ok := e.groups[prefix]; ok {
-			context.handlers = append(context.handlers, group.middlewares...)
-		}
-	}
 	return context
 }
 

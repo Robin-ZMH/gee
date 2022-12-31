@@ -3,9 +3,10 @@ package gee
 import "fmt"
 
 type node struct {
-	part     string
-	children []*node
-	pattern  string
+	prefix      string
+	children    []*node
+	pattern     string
+	middlewares []HandlerFunc
 }
 
 type trie struct {
@@ -17,19 +18,19 @@ func newTrie() *trie {
 }
 
 func (n *node) String() string {
-	return fmt.Sprintf("node{pattern=%s, part=%s}", n.pattern, n.part)
+	return fmt.Sprintf("node{pattern=%s, part=%s}", n.pattern, n.prefix)
 }
 
 func (n *node) isAny() bool {
-	if len(n.part) == 0 {
+	if len(n.prefix) == 0 {
 		return false
 	}
-	return n.part[0] == '*' || n.part[0] == ':'
+	return n.prefix[0] == '*' || n.prefix[0] == ':'
 }
 
 func (n *node) matchOne(part string) *node {
 	for _, node := range n.children {
-		if node.part == part || node.isAny() {
+		if node.prefix == part || node.isAny() {
 			return node
 		}
 	}
@@ -38,26 +39,27 @@ func (n *node) matchOne(part string) *node {
 
 func (n *node) matchAll(part string) (nodes []*node) {
 	for _, node := range n.children {
-		if node.part == part || node.isAny() {
+		if node.prefix == part || node.isAny() {
 			nodes = append(nodes, node)
 		}
 	}
 	return
 }
 
-func (t *trie) insert(pattern string) {
+func (t *trie) insert(pattern string, middlewares []HandlerFunc) {
 	parts := parsePattern(pattern)
 	cur_node := t.root
 
 	for _, part := range parts {
 		new_node := cur_node.matchOne(part)
 		if new_node == nil {
-			new_node = &node{part: part}
+			new_node = &node{prefix: part}
 			cur_node.children = append(cur_node.children, new_node)
 		}
 		cur_node = new_node
 	}
 	cur_node.pattern = pattern
+	cur_node.middlewares = middlewares
 }
 
 func (n *node) search(parts []string) *node {

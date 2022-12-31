@@ -14,9 +14,20 @@ func newRouterGroup() *routerGroup {
 	return &routerGroup{router: newRouter()}
 }
 
-func (r *routerGroup) addRoute(method, pattern string, handler HandlerFunc) {
-	pattern = r.prefix + pattern
-	r.register(method, pattern, handler)
+func (g *routerGroup) scanMiddleWares() (middlewares []HandlerFunc) {
+	node := g
+	for node != nil {
+		middlewares = append(node.middlewares, middlewares...)
+		node = node.parent
+	}
+	return
+}
+
+func (g *routerGroup) addRoute(method, pattern string, handler HandlerFunc) {
+	pattern = g.prefix + pattern
+	middlewares := g.scanMiddleWares()
+	middlewares = append(middlewares, handler)
+	g.register(method, pattern, middlewares...)
 }
 
 // GET defines the method to add GET request
@@ -30,19 +41,19 @@ func (g *routerGroup) POST(pattern string, handler HandlerFunc) {
 }
 
 // Group create a new group that inherit from the parent group
-func (r *routerGroup) Group(prefix string) *routerGroup {
+func (g *routerGroup) Group(prefix string) *routerGroup {
 	newGroup := &routerGroup{
-		router: r.router,
-		prefix: r.prefix + prefix,
-		parent: r,
-		engine: r.engine,
+		router: g.router,
+		prefix: g.prefix + prefix,
+		parent: g,
+		engine: g.engine,
 	}
-	r.engine.groups[prefix] = newGroup
+	g.engine.groups[prefix] = newGroup
 
 	return newGroup
 }
 
 // Use adds the middlewares to the current level group
-func (r *routerGroup) Use(middlewares ...HandlerFunc) {
-	r.middlewares = append(r.middlewares, middlewares...)
+func (g *routerGroup) Use(middlewares ...HandlerFunc) {
+	g.middlewares = append(g.middlewares, middlewares...)
 }
