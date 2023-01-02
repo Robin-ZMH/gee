@@ -5,13 +5,22 @@ import (
 	"time"
 )
 
+func startTimer(c *Context) func() {
+	t := time.Now()
+	return func() {
+		d := time.Since(t)
+		log.Println("=================================")
+		defer log.Println("=================================")
+		log.Printf("[%d] %s in %v", c.StatusCode, c.Req.RequestURI, d)
+	}
+}
+
 func Logger() HandlerFunc {
 	return func(c *Context) {
-		// Start timer
-		t := time.Now()
+		// start timer
+		stop := startTimer(c)
+		defer stop()
 		// Process request
 		c.Next()
-		// Calculate resolution time
-		log.Printf("[%d] %s in %v", c.StatusCode, c.Req.RequestURI, time.Since(t))
 	}
 }
