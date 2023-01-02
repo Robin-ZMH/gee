@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func startTimer(c *Context) func() {
+func startTimer(c *Context) (stop func()) {
 	t := time.Now()
 	return func() {
 		d := time.Since(t)
